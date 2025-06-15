@@ -43,40 +43,49 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        printf("Uso: %s <id_sensor> <timestamp>\n", argv[0]);
+        printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA O ARQUIVO DEVE SER NESTE FORMATO:\033[0m\n");
+        printf("\033[1;32mExemplo:\033[0m %s <id_sensor> <timestamp>\n", argv[0]);
         return 1;
     }
 
     char* id_sensor = argv[1];
     long timestamp_consulta = atol(argv[2]);
 
-    char nome_arquivo[64];
-    snprintf(nome_arquivo, sizeof(nome_arquivo), "%s.txt", id_sensor);
+    // Caminho para o arquivo dentro da pasta Arquivos_Gerados
+    char caminho_arquivo[256];
+    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/leitura.txt");
 
-    FILE* arquivo = fopen(nome_arquivo, "r");
+    FILE* arquivo = fopen(caminho_arquivo, "r");
     if (!arquivo) {
         perror("Erro ao abrir arquivo do sensor");
         return 1;
     }
 
     Leitura* dados = malloc(10000 * sizeof(Leitura)); // máximo esperado
-    int qtd = 0;
+    if (!dados) {
+        printf("Erro ao alocar memória\n");
+        fclose(arquivo);
+        return 1;
+    }
 
+    int qtd = 0;
     char linha[MAX_LINHA];
     while (fgets(linha, sizeof(linha), arquivo)) {
         long ts;
         char id_lido[MAX_ID], valor[MAX_VALOR];
         if (sscanf(linha, "%ld %s %s", &ts, id_lido, valor) == 3) {
-            dados[qtd].timestamp = ts;
-            strcpy(dados[qtd].valor, valor);
-            qtd++;
+            if (strcmp(id_lido, id_sensor) == 0) {  // só guarda dados do sensor solicitado
+                dados[qtd].timestamp = ts;
+                strcpy(dados[qtd].valor, valor);
+                qtd++;
+            }
         }
     }
 
     fclose(arquivo);
 
     if (qtd == 0) {
-        printf("Nenhum dado encontrado.\n");
+        printf("Nenhum dado encontrado para o sensor '%s'.\n", id_sensor);
         free(dados);
         return 1;
     }
