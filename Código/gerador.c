@@ -66,12 +66,10 @@ TipoDado obter_tipo(const char *tipo_str) {
 }
 
 int main(int argc, char *argv[]) {
-    // Extrair só o nome do executável do argv[0]
     char *execName = argv[0];
-    char *lastSlash = strrchr(argv[0], '\\'); // para Windows, barra invertida
-    
+    char *lastSlash = strrchr(argv[0], '\\'); 
     if (lastSlash != NULL) {
-        execName = lastSlash + 1;  // pega só o nome do arquivo depois da última barra
+        execName = lastSlash + 1;  
     }
 
     if (argc < 4) {
@@ -104,10 +102,8 @@ int main(int argc, char *argv[]) {
         strcpy(sensores[i].nome, nome_tipo);
         sensores[i].tipo = obter_tipo(tipo_str);
     }
-
-    // Cria pasta "Arquivos_Gerados" dentro da pasta Código
-    const char *pasta = "./Arquivos_Gerados";  // Caminho relativo saindo de /output
-    mkdir(pasta);  // Cria pasta (ignora erro se já existe)
+    const char *pasta = "./Arquivos_Gerados";  /output
+    mkdir(pasta); 
 
     char caminho_arquivo[256];
     snprintf(caminho_arquivo, sizeof(caminho_arquivo), "%s/leitura.txt", pasta);
