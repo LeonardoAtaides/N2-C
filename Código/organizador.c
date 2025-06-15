@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <direct.h>   // _mkdir para Windows
+#include <sys/stat.h> // mkdir para Linux/macOS
 
 #define MAX_SENSORES 100
 #define MAX_ID 32
@@ -19,7 +21,6 @@ typedef struct {
     int capacidade;
 } Sensor;
 
-
 int comparar_por_timestamp(const void* a, const void* b) {
     Leitura* la = (Leitura*)a;
     Leitura* lb = (Leitura*)b;
@@ -33,7 +34,6 @@ int encontrar_sensor(Sensor sensores[], int total, const char* id) {
     return -1;
 }
 
-
 void adicionar_leitura(Sensor* sensor, long timestamp, const char* valor) {
     if (sensor->qtd >= sensor->capacidade) {
         sensor->capacidade *= 2;
@@ -44,15 +44,12 @@ void adicionar_leitura(Sensor* sensor, long timestamp, const char* valor) {
     sensor->qtd++;
 }
 
-int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        printf("Uso: %s <arquivo_entrada>\n", argv[0]);
-        return 1;
-    }
+int main() {
+    char caminho_csv[] = "./Arquivos_Gerados/leitura.csv";
 
-    FILE* entrada = fopen(argv[1], "r");
+    FILE* entrada = fopen(caminho_csv, "r");
     if (!entrada) {
-        perror("Erro ao abrir arquivo");
+        perror("Erro ao abrir ./Arquivos_Gerados/leitura.csv");
         return 1;
     }
 
@@ -69,7 +66,6 @@ int main(int argc, char* argv[]) {
 
         int idx = encontrar_sensor(sensores, total_sensores, id_sensor);
         if (idx == -1) {
-            // Novo sensor
             strncpy(sensores[total_sensores].id_sensor, id_sensor, MAX_ID);
             sensores[total_sensores].leituras = malloc(100 * sizeof(Leitura));
             sensores[total_sensores].qtd = 0;
@@ -86,10 +82,15 @@ int main(int argc, char* argv[]) {
         Sensor* s = &sensores[i];
         qsort(s->leituras, s->qtd, sizeof(Leitura), comparar_por_timestamp);
 
-        char nome_arquivo[64];
-        snprintf(nome_arquivo, sizeof(nome_arquivo), "%s.txt", s->id_sensor);
+        char nome_arquivo[128];
+        snprintf(nome_arquivo, sizeof(nome_arquivo), "./Arquivos_Gerados/%s.csv", s->id_sensor);
 
         FILE* saida = fopen(nome_arquivo, "w");
+        if (!saida) {
+            perror("Erro ao criar arquivo de saída");
+            continue;
+        }
+
         for (int j = 0; j < s->qtd; j++) {
             fprintf(saida, "%ld %s %s\n", s->leituras[j].timestamp, s->id_sensor, s->leituras[j].valor);
         }
@@ -97,6 +98,6 @@ int main(int argc, char* argv[]) {
         free(s->leituras);
     }
 
-    printf("Organização concluída com sucesso.\n");
+    printf("Organização concluída com sucesso! Arquivos salvos em Arquivos_Gerados/.\n");
     return 0;
 }

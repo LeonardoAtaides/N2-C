@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <math.h>
 
 #define MAX_LINHA 128
 #define MAX_VALOR 64
@@ -13,10 +12,12 @@ typedef struct {
     char valor[MAX_VALOR];
 } Leitura;
 
+// Função para diferença absoluta
 long diferenca(long a, long b) {
     return labs(a - b);
 }
 
+// Busca binária para encontrar índice do elemento com timestamp mais próximo do alvo
 int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
     int inicio = 0, fim = n - 1;
     int mais_proximo = 0;
@@ -24,16 +25,19 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
     while (inicio <= fim) {
         int meio = (inicio + fim) / 2;
 
+        if (dados[meio].timestamp == alvo) {
+            return meio; // Exato encontrado
+        }
+
+        // Atualiza o índice do mais próximo
         if (diferenca(dados[meio].timestamp, alvo) < diferenca(dados[mais_proximo].timestamp, alvo)) {
             mais_proximo = meio;
         }
 
         if (dados[meio].timestamp < alvo)
             inicio = meio + 1;
-        else if (dados[meio].timestamp > alvo)
-            fim = meio - 1;
         else
-            return meio; 
+            fim = meio - 1;
     }
 
     return mais_proximo;
@@ -49,9 +53,9 @@ int main(int argc, char* argv[]) {
     char* id_sensor = argv[1];
     long timestamp_consulta = atol(argv[2]);
 
-
+    // Arquivo já organizado e ordenado, dentro da pasta 'Arquivos_Gerados'
     char caminho_arquivo[256];
-    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/leitura.csv");
+    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/%s.txt", id_sensor);
 
     FILE* arquivo = fopen(caminho_arquivo, "r");
     if (!arquivo) {
@@ -59,7 +63,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Leitura* dados = malloc(10000 * sizeof(Leitura)); 
+    // Aloca para até 10000 leituras (ajuste se precisar)
+    Leitura* dados = malloc(10000 * sizeof(Leitura));
     if (!dados) {
         printf("Erro ao alocar memória\n");
         fclose(arquivo);
@@ -72,11 +77,10 @@ int main(int argc, char* argv[]) {
         long ts;
         char id_lido[MAX_ID], valor[MAX_VALOR];
         if (sscanf(linha, "%ld %s %s", &ts, id_lido, valor) == 3) {
-            if (strcmp(id_lido, id_sensor) == 0) {  
-                dados[qtd].timestamp = ts;
-                strcpy(dados[qtd].valor, valor);
-                qtd++;
-            }
+            // Como arquivo é do sensor específico, não precisa comparar id
+            dados[qtd].timestamp = ts;
+            strcpy(dados[qtd].valor, valor);
+            qtd++;
         }
     }
 
@@ -89,6 +93,7 @@ int main(int argc, char* argv[]) {
     }
 
     int indice = busca_binaria_proximo(dados, qtd, timestamp_consulta);
+
     printf("Leitura mais próxima:\n%ld %s %s\n", dados[indice].timestamp, id_sensor, dados[indice].valor);
 
     free(dados);
