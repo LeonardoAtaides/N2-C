@@ -3,6 +3,13 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#define mkdir _mkdir
+#else
+#include <sys/stat.h>
+#endif
+
 #define MAX_SENSORES 50
 #define MAX_NOME 32
 
@@ -13,25 +20,30 @@ typedef struct {
     TipoDado tipo;
 } Sensor;
 
-TipoDado obter_tipo(const char *tipo_str) {
-    if (strcmp(tipo_str, "int") == 0) return TIPO_INT;
-    if (strcmp(tipo_str, "bool") == 0) return TIPO_BOOL;
-    if (strcmp(tipo_str, "float") == 0) return TIPO_FLOAT;
-    if (strcmp(tipo_str, "string") == 0) return TIPO_STRING;
-    return -1;
+time_t converter_para_timestamp(const char *data_str) {
+    struct tm t;
+    sscanf(data_str, "%d/%d/%d-%d:%d:%d",
+           &t.tm_mday, &t.tm_mon, &t.tm_year,
+           &t.tm_hour, &t.tm_min, &t.tm_sec);
+
+    t.tm_year -= 1900;
+    t.tm_mon -= 1;
+    t.tm_isdst = -1;
+
+    return mktime(&t);
 }
 
-char* gerar_valor_aleatorio(TipoDado tipo) {
+char *gerar_valor_aleatorio(TipoDado tipo) {
     static char buffer[32];
     switch (tipo) {
         case TIPO_INT:
             sprintf(buffer, "%d", rand() % 1000);
             break;
         case TIPO_BOOL:
-            sprintf(buffer, "%s", (rand() % 2 == 0) ? "false" : "true");
+            sprintf(buffer, "%s", (rand() % 2) ? "true" : "false");
             break;
         case TIPO_FLOAT:
-            sprintf(buffer, "%.2f", (float)rand() / RAND_MAX * 100.0);
+            sprintf(buffer, "%.2f", ((float)rand() / RAND_MAX) * 100.0);
             break;
         case TIPO_STRING: {
             int len = 4 + rand() % 13;
@@ -44,21 +56,29 @@ char* gerar_valor_aleatorio(TipoDado tipo) {
     }
     return buffer;
 }
-time_t converter_para_timestamp(const char *data_str) {
-    struct tm t = {0};
-    sscanf(data_str, "%d/%d/%d-%d:%d:%d",
-           &t.tm_mday, &t.tm_mon, &t.tm_year,
-           &t.tm_hour, &t.tm_min, &t.tm_sec);
-    t.tm_year -= 1900;
-    t.tm_mon -= 1;
-    t.tm_isdst = -1;
-    return mktime(&t);
+
+TipoDado obter_tipo(const char *tipo_str) {
+    if (strcmp(tipo_str, "int") == 0) return TIPO_INT;
+    if (strcmp(tipo_str, "bool") == 0) return TIPO_BOOL;
+    if (strcmp(tipo_str, "float") == 0) return TIPO_FLOAT;
+    if (strcmp(tipo_str, "string") == 0) return TIPO_STRING;
+    return -1;
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 5) {
-        printf("Uso: %s <data_inicio> <data_fim> <sensor1:tipo> [sensor2:tipo] ...\n", argv[0]);
-        printf("Exemplo: %s 15/06/2025-00:00:00 15/06/2025-23:59:59 temp:int umidade:float status:bool\n", argv[0]);
+    // Extrair só o nome do executável do argv[0]
+    char *execName = argv[0];
+    char *lastSlash = strrchr(argv[0], '\\'); // para Windows, barra invertida
+    
+    if (lastSlash != NULL) {
+        execName = lastSlash + 1;  // pega só o nome do arquivo depois da última barra
+    }
+
+    if (argc < 4) {
+        printf("\033[1;33mALERTA! PARA GERAR O ARQUIVO DEVE SER NESTE FORMATO:\033[0m\n");
+        printf("Uso: .\\%s <data_inicio> <data_fim> <sensor1:tipo> [sensor2:tipo] ...\n", execName);
+        printf("\033[1;32mExemplo:\033[0m .\\%s 15/06/2025-00:00:00 15/06/2025-23:59:59 temp:int umidade:float\n\n", execName);
+
         return 1;
     }
 
@@ -67,11 +87,6 @@ int main(int argc, char *argv[]) {
     time_t inicio = converter_para_timestamp(argv[1]);
     time_t fim = converter_para_timestamp(argv[2]);
 
-    if (inicio == -1 || fim == -1 || fim <= inicio) {
-        printf("Erro: intervalo de tempo inválido.\n");
-        return 1;
-    }
-
     int qtd_sensores = argc - 3;
     Sensor sensores[MAX_SENSORES];
 
@@ -79,26 +94,27 @@ int main(int argc, char *argv[]) {
         char *nome_tipo = argv[i + 3];
         char *tipo_str = strchr(nome_tipo, ':');
         if (!tipo_str) {
-            printf("Erro: sensor mal formatado: %s (esperado formato nome:tipo)\n", nome_tipo);
+            printf("Erro no argumento: %s\n", nome_tipo);
             return 1;
         }
 
         *tipo_str = '\0';
         tipo_str++;
 
-        TipoDado tipo = obter_tipo(tipo_str);
-        if (tipo == -1) {
-            printf("Erro: tipo inválido: %s\n", tipo_str);
-            return 1;
-        }
-
-        strncpy(sensores[i].nome, nome_tipo, MAX_NOME);
-        sensores[i].tipo = tipo;
+        strcpy(sensores[i].nome, nome_tipo);
+        sensores[i].tipo = obter_tipo(tipo_str);
     }
 
-    FILE *arquivo = fopen("leitura.txt", "w");
+    // Cria pasta "Arquivos_Gerados" dentro da pasta Código
+    const char *pasta = "./Arquivos_Gerados";  // Caminho relativo saindo de /output
+    mkdir(pasta);  // Cria pasta (ignora erro se já existe)
+
+    char caminho_arquivo[256];
+    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "%s/leitura.txt", pasta);
+
+    FILE *arquivo = fopen(caminho_arquivo, "w");
     if (!arquivo) {
-        perror("Erro ao abrir arquivo");
+        perror("Erro ao criar arquivo");
         return 1;
     }
 
@@ -111,6 +127,7 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(arquivo);
-    printf("Arquivo leitura.txt gerado com sucesso com %d sensores e 2000 leituras cada.\n", qtd_sensores);
+    printf("\033[1;32mArquivo gerado com sucesso\033[0m em: %s\n", caminho_arquivo);
+
     return 0;
 }
