@@ -13,12 +13,10 @@ typedef struct {
     char valor[MAX_VALOR];
 } Leitura;
 
-// Função para calcular diferença absoluta entre timestamps
 long diferenca(long a, long b) {
     return labs(a - b);
 }
 
-// Função de busca binária modificada para encontrar o timestamp mais próximo
 int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
     int inicio = 0, fim = n - 1;
     int mais_proximo = 0;
@@ -35,7 +33,7 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
         else if (dados[meio].timestamp > alvo)
             fim = meio - 1;
         else
-            return meio; // achou exatamente
+            return meio; 
     }
 
     return mais_proximo;
@@ -51,9 +49,9 @@ int main(int argc, char* argv[]) {
     char* id_sensor = argv[1];
     long timestamp_consulta = atol(argv[2]);
 
-    // Caminho para o arquivo dentro da pasta Arquivos_Gerados
+
     char caminho_arquivo[256];
-    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/leitura.txt");
+    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/leitura.csv");
 
     FILE* arquivo = fopen(caminho_arquivo, "r");
     if (!arquivo) {
@@ -61,7 +59,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Leitura* dados = malloc(10000 * sizeof(Leitura)); // máximo esperado
+    Leitura* dados = malloc(10000 * sizeof(Leitura)); 
     if (!dados) {
         printf("Erro ao alocar memória\n");
         fclose(arquivo);
@@ -74,7 +72,7 @@ int main(int argc, char* argv[]) {
         long ts;
         char id_lido[MAX_ID], valor[MAX_VALOR];
         if (sscanf(linha, "%ld %s %s", &ts, id_lido, valor) == 3) {
-            if (strcmp(id_lido, id_sensor) == 0) {  // só guarda dados do sensor solicitado
+            if (strcmp(id_lido, id_sensor) == 0) {  
                 dados[qtd].timestamp = ts;
                 strcpy(dados[qtd].valor, valor);
                 qtd++;
