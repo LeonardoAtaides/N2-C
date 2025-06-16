@@ -55,7 +55,7 @@ Este programa irá ler os dados embaralhados e gerar automaticamente arquivos or
 ### Etapa 3 – Consulta por Instante (Programa 2)
 
 Execute o programa de consulta com:
-_A lógica do programa 1, está neste arquivo:_
+_A lógica do programa 2, está neste arquivo:_
 ```bash
 consulta.c
 ```
