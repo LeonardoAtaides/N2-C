@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 #define MAX_LINHA 128
 #define MAX_VALOR 64
@@ -42,6 +43,11 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
     return mais_proximo;
 }
 
+int arquivo_existe(const char *caminho) {
+    struct stat buffer;
+    return (stat(caminho, &buffer) == 0);
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA DEVE SER NESTE FORMATO:\033[0m\n");
@@ -60,6 +66,11 @@ int main(int argc, char* argv[]) {
 
     char caminho_arquivo[256];
     snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/%s.csv", id_sensor);
+
+    if (!arquivo_existe(caminho_arquivo)) {
+        printf("\033[1;31mErro: Sensor '%s' não encontrado. Verifique o nome do sensor.\033[0m\n", id_sensor);
+        return 1;
+    }
 
     FILE* arquivo = fopen(caminho_arquivo, "r");
     if (!arquivo) {
