@@ -50,6 +50,8 @@ int main() {
     FILE* entrada = fopen(caminho_csv, "r");
     if (!entrada) {
         perror("Erro ao abrir ./Arquivos_Gerados/arquivos_embaralhados.csv");
+        printf("\033[1;33mCertifique-se de que a pasta 'Arquivos_Gerados' está criada, se não é necessário executar o programa 'gerador.c'.\033[0m\n");
+
         return 1;
     }
 
