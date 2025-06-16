@@ -1,203 +1,144 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-
-#ifdef _WIN32
-#include <direct.h>
-#define mkdir _mkdir
-#else
+#include <limits.h>
 #include <sys/stat.h>
-#endif
 
-#define MAX_SENSORES 50
-#define MAX_NOME 32
-#define MAX_LEITURAS 2000
-
-typedef enum { TIPO_INT, TIPO_BOOL, TIPO_FLOAT, TIPO_STRING, TIPO_INVALIDO = -1 } TipoDado;
+#define MAX_LINHA 128
+#define MAX_VALOR 64
+#define MAX_ID 32
 
 typedef struct {
-    char nome[MAX_NOME];
-    TipoDado tipo;
-} Sensor;
-
-typedef struct {
-    time_t timestamp;
-    char sensor_nome[MAX_NOME];
-    char valor[32];
+    long timestamp;
+    char valor[MAX_VALOR];
 } Leitura;
 
-int comparar_timestamp_desc(const void *a, const void *b) {
-    const Leitura *la = (const Leitura *)a;
-    const Leitura *lb = (const Leitura *)b;
-    return (lb->timestamp - la->timestamp); // ordem decrescente
+long diferenca(long a, long b) {
+    return labs(a - b);
 }
 
-time_t converter_para_timestamp(const char *data_str) {
-    struct tm t;
-    memset(&t, 0, sizeof(t));
-    int campos = sscanf(data_str, "%d/%d/%d-%d:%d:%d",
-        &t.tm_mday, &t.tm_mon, &t.tm_year,
-        &t.tm_hour, &t.tm_min, &t.tm_sec);
-    if (campos != 6) {
-        fprintf(stderr, "Formato de data/hora invalido. Use dd/mm/yyyy-hh:mm:ss\n");
-        return (time_t)-1;
-    }
+int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
+    int inicio = 0, fim = n - 1;
+    int mais_proximo = -1;
+    long menor_dif = LONG_MAX;
 
-    t.tm_year -= 1900;
-    t.tm_mon -= 1;
-    t.tm_isdst = -1;
+    while (inicio <= fim) {
+        int meio = (inicio + fim) / 2;
 
-    time_t timestamp = mktime(&t);
-    if (timestamp == (time_t)-1) {
-        fprintf(stderr, "Erro ao converter data/hora.\n");
-    }
-    return timestamp;
-}
-
-char *gerar_valor_aleatorio(TipoDado tipo) {
-    static char buffer[32];
-    switch (tipo) {
-        case TIPO_INT:
-            sprintf(buffer, "%d", rand() % 1000);
-            break;
-        case TIPO_BOOL:
-            sprintf(buffer, "%s", (rand() % 2) ? "true" : "false");
-            break;
-        case TIPO_FLOAT:
-            sprintf(buffer, "%.2f", ((float)rand() / RAND_MAX) * 100.0f);
-            break;
-        case TIPO_STRING: {
-            int len = 4 + rand() % 13;
-            for (int i = 0; i < len; i++) {
-                buffer[i] = 'A' + rand() % 26;
-            }
-            buffer[len] = '\0';
-            break;
+        long dif_atual = diferenca(dados[meio].timestamp, alvo);
+        if (dif_atual < menor_dif) {
+            menor_dif = dif_atual;
+            mais_proximo = meio;
         }
-        default:
-            strcpy(buffer, "NA");
-            break;
+
+        if (dados[meio].timestamp == alvo) {
+            return meio;
+        } else if (dados[meio].timestamp < alvo) {
+            inicio = meio + 1;
+        } else {
+            fim = meio - 1;
+        }
     }
-    return buffer;
+
+    return mais_proximo;
 }
 
-TipoDado obter_tipo(const char *tipo_str) {
-    if (strcmp(tipo_str, "int") == 0) return TIPO_INT;
-    if (strcmp(tipo_str, "bool") == 0) return TIPO_BOOL;
-    if (strcmp(tipo_str, "float") == 0) return TIPO_FLOAT;
-    if (strcmp(tipo_str, "string") == 0) return TIPO_STRING;
-    return TIPO_INVALIDO;
+int arquivo_existe(const char *caminho) {
+    struct stat buffer;
+    return (stat(caminho, &buffer) == 0);
 }
 
-void embaralhar_leituras(Leitura *leituras, int n) {
-    for (int i = n - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        Leitura temp = leituras[i];
-        leituras[i] = leituras[j];
-        leituras[j] = temp;
-    }
-}
-
-int main(int argc, char *argv[]) {
-    char *execName = argv[0];
-    char *lastSlash = strrchr(argv[0], '\\');
-    if (lastSlash != NULL) execName = lastSlash + 1;
-
-    if (argc < 4) {
-        printf("\033[1;33mALERTA! PARA GERAR O ARQUIVO DEVE SER NESTE FORMATO:\033[0m\n");
-        printf("Uso: .\\%s <data_inicio> <data_fim> <sensor1:tipo> [sensor2:tipo] ...\n", execName);
-        printf("\033[1;32mExemplo:\033[0m .\\%s 15/06/2025-00:00:00 15/06/2025-23:59:59 temp:int umidade:float\n\n", execName);
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA DEVE SER NESTE FORMATO:\033[0m\n");
+        printf("\033[1;32mExemplo:\033[0m.\\consulta <id_sensor> <timestamp>\n", argv[0]);
         return 1;
     }
 
-    srand((unsigned int)time(NULL));
+    char* id_sensor = argv[1];
+    char* fim_parse;
+    long timestamp_consulta = strtol(argv[2], &fim_parse, 10);
 
-    time_t inicio = converter_para_timestamp(argv[1]);
-    time_t fim = converter_para_timestamp(argv[2]);
-    if (inicio == (time_t)-1 || fim == (time_t)-1 || fim < inicio) {
-        fprintf(stderr, "Intervalo de datas invalido.\n");
+    if (*fim_parse != '\0') {
+        printf("\033[1;31mErro: Timestamp invalido. Use numero inteiro representando unix epoch.\033[0m\n");
         return 1;
     }
-
-    int qtd_sensores = argc - 3;
-    if (qtd_sensores > MAX_SENSORES) {
-        fprintf(stderr, "Limite maximo de sensores (%d) ultrapassado.\n", MAX_SENSORES);
-        return 1;
-    }
-
-    Sensor sensores[MAX_SENSORES];
-    for (int i = 0; i < qtd_sensores; i++) {
-        char nome_tipo_tmp[64];
-        strncpy(nome_tipo_tmp, argv[i + 3], sizeof(nome_tipo_tmp) - 1);
-        nome_tipo_tmp[sizeof(nome_tipo_tmp) - 1] = '\0';
-
-        char *tipo_str = strchr(nome_tipo_tmp, ':');
-        if (!tipo_str) {
-            fprintf(stderr, "Erro no argumento: %s\n", argv[i + 3]);
-            return 1;
-        }
-
-        *tipo_str = '\0';
-        tipo_str++;
-
-        sensores[i].tipo = obter_tipo(tipo_str);
-        if (sensores[i].tipo == TIPO_INVALIDO) {
-            fprintf(stderr, "Tipo invalido para sensor %s\n", nome_tipo_tmp);
-            return 1;
-        }
-        strncpy(sensores[i].nome, nome_tipo_tmp, MAX_NOME);
-        sensores[i].nome[MAX_NOME - 1] = '\0';
-    }
-
-    const char *pasta = "./Arquivos_Gerados";
-#ifdef _WIN32
-    mkdir(pasta);
-#else
-    mkdir(pasta, 0755);
-#endif
 
     char caminho_arquivo[256];
-    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "%s/arquivos_embaralhados.csv", pasta);
+    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/%s.csv", id_sensor);
 
-    FILE *arquivo = fopen(caminho_arquivo, "w");
-    if (!arquivo) {
-        perror("Erro ao criar arquivo");
+    if (!arquivo_existe(caminho_arquivo)) {
+        printf("\033[1;31mErro: Sensor '%s' nao encontrado. Verifique o nome do sensor.\033[0m\n", id_sensor);
         return 1;
     }
 
-    int total_leituras = qtd_sensores * MAX_LEITURAS;
-    Leitura *leituras = malloc(sizeof(Leitura) * total_leituras);
-    if (!leituras) {
-        fprintf(stderr, "Erro de memoria.\n");
+    FILE* arquivo = fopen(caminho_arquivo, "r");
+    if (!arquivo) {
+        perror("Erro ao abrir arquivo do sensor");
+        return 1;
+    }
+
+    Leitura* dados = NULL;
+    int capacidade = 1000;
+    int qtd = 0;
+
+    dados = malloc(capacidade * sizeof(Leitura));
+    if (!dados) {
+        printf("\033[1;31mErro ao alocar memoria.\033[0m\n");
         fclose(arquivo);
         return 1;
     }
 
-    for (int i = 0, idx = 0; i < qtd_sensores; i++) {
-        for (int j = 0; j < MAX_LEITURAS; j++, idx++) {
-            unsigned long range = (unsigned long)(fim - inicio) + 1;
-            unsigned long offset = (unsigned long)(rand()) % range;
-
-            leituras[idx].timestamp = inicio + offset;
-            strncpy(leituras[idx].sensor_nome, sensores[i].nome, MAX_NOME);
-            leituras[idx].sensor_nome[MAX_NOME - 1] = '\0';
-            strncpy(leituras[idx].valor, gerar_valor_aleatorio(sensores[i].tipo), sizeof(leituras[idx].valor));
-            leituras[idx].valor[sizeof(leituras[idx].valor) - 1] = '\0';
+    char linha[MAX_LINHA];
+    while (fgets(linha, sizeof(linha), arquivo)) {
+        long ts;
+        char id_lido[MAX_ID], valor[MAX_VALOR];
+        int campos_lidos = sscanf(linha, "%ld %s %s", &ts, id_lido, valor);
+        if (campos_lidos != 3) {
+            continue;
         }
+        if (strcmp(id_lido, id_sensor) != 0) {
+            continue;
+        }
+
+        if (qtd >= capacidade) {
+            capacidade *= 2;
+            Leitura* temp = realloc(dados, capacidade * sizeof(Leitura));
+            if (!temp) {
+                printf("\033[1;31mErro ao realocar memoria.\033[0m\n");
+                free(dados);
+                fclose(arquivo);
+                return 1;
+            }
+            dados = temp;
+        }
+
+        dados[qtd].timestamp = ts;
+        strncpy(dados[qtd].valor, valor, MAX_VALOR - 1);
+        dados[qtd].valor[MAX_VALOR - 1] = '\0'; 
+        qtd++;
     }
 
-    embaralhar_leituras(leituras, total_leituras);
-    qsort(leituras, total_leituras, sizeof(Leitura), comparar_timestamp_desc);
-
-    for (int i = 0; i < total_leituras; i++) {
-        fprintf(arquivo, "%ld %s %s\n", leituras[i].timestamp, leituras[i].sensor_nome, leituras[i].valor);
-    }
-
-    free(leituras);
     fclose(arquivo);
 
-    printf("\033[1;32mArquivo gerado com sucesso\033[0m em: %s\n", caminho_arquivo);
+    if (qtd == 0) {
+        printf("\033[1;33mNenhum dado encontrado para o sensor '%s'.\033[0m\n", id_sensor);
+        free(dados);
+        return 1;
+    }
 
+    int indice = busca_binaria_proximo(dados, qtd, timestamp_consulta);
+    if (indice == -1) {
+        printf("\033[1;33mNenhuma leitura encontrada proxima ao timestamp fornecido.\033[0m\n");
+        free(dados);
+        return 1;
+    }
+
+    printf("Leitura mais proxima encontrada:\n");
+    printf("Timestamp: %ld\n", dados[indice].timestamp);
+    printf("Sensor: %s\n", id_sensor);
+    printf("Valor: %s\n", dados[indice].valor);
+
+    free(dados);
     return 0;
 }
