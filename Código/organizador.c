@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <direct.h>   // _mkdir para Windows
-#include <sys/stat.h> // mkdir para Linux/macOS
+#include <direct.h> 
+#include <sys/stat.h>
 
 #define MAX_SENSORES 100
 #define MAX_ID 32

@@ -44,7 +44,7 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA O ARQUIVO DEVE SER NESTE FORMATO:\033[0m\n");
+        printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA DEVE SER NESTE FORMATO:\033[0m\n");
         printf("\033[1;32mExemplo:\033[0m.\\consulta <id_sensor> <timestamp>\n", argv[0]);
         return 1;
     }
