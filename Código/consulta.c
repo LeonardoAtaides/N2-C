@@ -33,7 +33,7 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
 
         if (dados[meio].timestamp == alvo) {
             return meio;
-        } else if (dados[meio].timestamp > alvo) {
+        } else if (dados[meio].timestamp < alvo) {
             inicio = meio + 1;
         } else {
             fim = meio - 1;
@@ -51,7 +51,7 @@ int arquivo_existe(const char *caminho) {
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA DEVE SER NESTE FORMATO:\033[0m\n");
-        printf("\033[1;32mExemplo:\033[0m .\\consulta <id_sensor> <timestamp>\n");
+        printf("\033[1;32mExemplo:\033[0m.\\consulta <id_sensor> <timestamp>\n", argv[0]);
         return 1;
     }
 
@@ -63,8 +63,6 @@ int main(int argc, char* argv[]) {
         printf("\033[1;31mErro: Timestamp invalido. Use numero inteiro representando unix epoch.\033[0m\n");
         return 1;
     }
-
-    printf("\033[1;34mINFO:\033[0m Este programa espera que os arquivos estejam ordenados por timestamp em ordem \033[1;36mdecrescente\033[0m.\n\n");
 
     char caminho_arquivo[256];
     snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/%s.csv", id_sensor);
@@ -117,7 +115,7 @@ int main(int argc, char* argv[]) {
 
         dados[qtd].timestamp = ts;
         strncpy(dados[qtd].valor, valor, MAX_VALOR - 1);
-        dados[qtd].valor[MAX_VALOR - 1] = '\0';
+        dados[qtd].valor[MAX_VALOR - 1] = '\0'; 
         qtd++;
     }
 
@@ -136,7 +134,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    printf("Leitura mais próxima encontrada:\n");
+    printf("Leitura mais proxima encontrada:\n");
     printf("Timestamp: %ld\n", dados[indice].timestamp);
     printf("Sensor: %s\n", id_sensor);
     printf("Valor: %s\n", dados[indice].valor);
