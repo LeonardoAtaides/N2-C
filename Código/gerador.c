@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     char caminho_arquivo[256];
-    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "%s/leitura.csv", pasta);
+    snprintf(caminho_arquivo, sizeof(caminho_arquivo), "%s/arquivos_embaralhados.csv", pasta);
 
     FILE *arquivo = fopen(caminho_arquivo, "w");
     if (!arquivo) {

@@ -45,11 +45,11 @@ void adicionar_leitura(Sensor* sensor, long timestamp, const char* valor) {
 }
 
 int main() {
-    char caminho_csv[] = "./Arquivos_Gerados/leitura.csv";
+    char caminho_csv[] = "./Arquivos_Gerados/arquivos_embaralhados.csv";
 
     FILE* entrada = fopen(caminho_csv, "r");
     if (!entrada) {
-        perror("Erro ao abrir ./Arquivos_Gerados/leitura.csv");
+        perror("Erro ao abrir ./Arquivos_Gerados/arquivos_embaralhados.csv");
         return 1;
     }
 
