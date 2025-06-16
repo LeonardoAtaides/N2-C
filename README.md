@@ -1,7 +1,7 @@
 
 # Compilação dos Programas
 
-**Antes de iniciar a execução, compile os programas com os seguintes comandos:**
+**Antes de iniciar a execução, certifique-se se esta na pasta `Código`, em seguida compile os programas com os seguintes comandos:**
 
 ```bash
 gcc gerador.c -o gerador
