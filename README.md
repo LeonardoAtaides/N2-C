@@ -70,5 +70,5 @@ Se executado sem parâmetros, ele exibe uma orientação de uso semelhante à im
 [![Print Consulta](https://drive.google.com/uc?id=10FJIAeuHvAMZSBekeallZXOMTmlGQ03F)](https://drive.google.com/file/d/10FJIAeuHvAMZSBekeallZXOMTmlGQ03F/view?usp=drive_link)
 
 
-Desenvolvido por: **Leonardo**  
+Desenvolvido por: **Leonardo Ataídes**  
 
