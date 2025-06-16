@@ -100,6 +100,6 @@ int main() {
         free(s->leituras);
     }
 
-    printf("Organização concluída com sucesso! Arquivos salvos em Arquivos_Gerados/.\n");
+    printf("\033[1;32mOrganização concluída com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/.\n");
     return 0;
 }

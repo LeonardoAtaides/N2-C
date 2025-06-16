@@ -44,11 +44,8 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        printf("\033[1;33mUSO INCORRETO!\033[0m\n");
-        printf("Uso correto:\n");
-        printf("\033[1;32m%s <id_sensor> <timestamp_unix>\033[0m\n", argv[0]);
-        printf("Exemplo:\n");
-        printf("\033[1;32m%s umidade 1650000000\033[0m\n", argv[0]);
+        printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA DEVE SER NESTE FORMATO:\033[0m\n");
+        printf("\033[1;32mExemplo:\033[0m.\\consulta <id_sensor> <timestamp>\n", argv[0]);
         return 1;
     }
 
