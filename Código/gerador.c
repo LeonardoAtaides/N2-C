@@ -34,15 +34,19 @@ time_t converter_para_timestamp(const char *data_str) {
         &t.tm_mday, &t.tm_mon, &t.tm_year,
         &t.tm_hour, &t.tm_min, &t.tm_sec);
     if (campos != 6) {
-        printf("Formato de data/hora inválido.\n");
-        return -1;
+        fprintf(stderr, "Formato de data/hora inválido. Use dd/mm/yyyy-hh:mm:ss\n");
+        return (time_t)-1;
     }
 
     t.tm_year -= 1900;
     t.tm_mon -= 1;
     t.tm_isdst = -1;
 
-    return mktime(&t);
+    time_t timestamp = mktime(&t);
+    if (timestamp == (time_t)-1) {
+        fprintf(stderr, "Erro ao converter data/hora.\n");
+    }
+    return timestamp;
 }
 
 char *gerar_valor_aleatorio(TipoDado tipo) {
@@ -55,7 +59,7 @@ char *gerar_valor_aleatorio(TipoDado tipo) {
             sprintf(buffer, "%s", (rand() % 2) ? "true" : "false");
             break;
         case TIPO_FLOAT:
-            sprintf(buffer, "%.2f", ((float)rand() / RAND_MAX) * 100.0);
+            sprintf(buffer, "%.2f", ((float)rand() / RAND_MAX) * 100.0f);
             break;
         case TIPO_STRING: {
             int len = 4 + rand() % 13;
@@ -101,27 +105,30 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
 
     time_t inicio = converter_para_timestamp(argv[1]);
     time_t fim = converter_para_timestamp(argv[2]);
-    if (inicio == -1 || fim == -1 || fim < inicio) {
-        printf("Intervalo de datas inválido.\n");
+    if (inicio == (time_t)-1 || fim == (time_t)-1 || fim < inicio) {
+        fprintf(stderr, "Intervalo de datas inválido.\n");
         return 1;
     }
 
     int qtd_sensores = argc - 3;
     if (qtd_sensores > MAX_SENSORES) {
-        printf("Limite máximo de sensores (%d) ultrapassado.\n", MAX_SENSORES);
+        fprintf(stderr, "Limite máximo de sensores (%d) ultrapassado.\n", MAX_SENSORES);
         return 1;
     }
 
     Sensor sensores[MAX_SENSORES];
     for (int i = 0; i < qtd_sensores; i++) {
-        char *nome_tipo = argv[i + 3];
-        char *tipo_str = strchr(nome_tipo, ':');
+        char nome_tipo_tmp[64];
+        strncpy(nome_tipo_tmp, argv[i + 3], sizeof(nome_tipo_tmp) - 1);
+        nome_tipo_tmp[sizeof(nome_tipo_tmp) - 1] = '\0';
+
+        char *tipo_str = strchr(nome_tipo_tmp, ':');
         if (!tipo_str) {
-            printf("Erro no argumento: %s\n", nome_tipo);
+            fprintf(stderr, "Erro no argumento: %s\n", argv[i + 3]);
             return 1;
         }
 
@@ -130,10 +137,11 @@ int main(int argc, char *argv[]) {
 
         sensores[i].tipo = obter_tipo(tipo_str);
         if (sensores[i].tipo == TIPO_INVALIDO) {
-            printf("Tipo inválido para sensor %s\n", nome_tipo);
+            fprintf(stderr, "Tipo inválido para sensor %s\n", nome_tipo_tmp);
             return 1;
         }
-        strcpy(sensores[i].nome, nome_tipo);
+        strncpy(sensores[i].nome, nome_tipo_tmp, MAX_NOME);
+        sensores[i].nome[MAX_NOME - 1] = '\0';
     }
 
     const char *pasta = "./Arquivos_Gerados";
@@ -155,18 +163,21 @@ int main(int argc, char *argv[]) {
     int total_leituras = qtd_sensores * MAX_LEITURAS;
     Leitura *leituras = malloc(sizeof(Leitura) * total_leituras);
     if (!leituras) {
-        printf("Erro de memória.\n");
+        fprintf(stderr, "Erro de memória.\n");
         fclose(arquivo);
         return 1;
     }
 
-    int idx = 0;
-    for (int i = 0; i < qtd_sensores; i++) {
-        for (int j = 0; j < MAX_LEITURAS; j++) {
-            leituras[idx].timestamp = inicio + rand() % (fim - inicio + 1);
-            strcpy(leituras[idx].sensor_nome, sensores[i].nome);
-            strcpy(leituras[idx].valor, gerar_valor_aleatorio(sensores[i].tipo));
-            idx++;
+    for (int i = 0, idx = 0; i < qtd_sensores; i++) {
+        for (int j = 0; j < MAX_LEITURAS; j++, idx++) {
+            unsigned long range = (unsigned long)(fim - inicio) + 1;
+            unsigned long offset = (unsigned long)(rand()) % range;
+
+            leituras[idx].timestamp = inicio + offset;
+            strncpy(leituras[idx].sensor_nome, sensores[i].nome, MAX_NOME);
+            leituras[idx].sensor_nome[MAX_NOME - 1] = '\0';
+            strncpy(leituras[idx].valor, gerar_valor_aleatorio(sensores[i].tipo), sizeof(leituras[idx].valor));
+            leituras[idx].valor[sizeof(leituras[idx].valor) - 1] = '\0';
         }
     }
 
