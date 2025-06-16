@@ -27,12 +27,6 @@ typedef struct {
     char valor[32];
 } Leitura;
 
-int comparar_timestamp_desc(const void *a, const void *b) {
-    const Leitura *la = (const Leitura *)a;
-    const Leitura *lb = (const Leitura *)b;
-    return (lb->timestamp - la->timestamp); // ordem decrescente
-}
-
 time_t converter_para_timestamp(const char *data_str) {
     struct tm t;
     memset(&t, 0, sizeof(t));
@@ -188,7 +182,6 @@ int main(int argc, char *argv[]) {
     }
 
     embaralhar_leituras(leituras, total_leituras);
-    qsort(leituras, total_leituras, sizeof(Leitura), comparar_timestamp_desc);
 
     for (int i = 0; i < total_leituras; i++) {
         fprintf(arquivo, "%ld %s %s\n", leituras[i].timestamp, leituras[i].sensor_nome, leituras[i].valor);
