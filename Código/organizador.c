@@ -50,7 +50,7 @@ int main() {
     FILE* entrada = fopen(caminho_csv, "r");
     if (!entrada) {
         perror("Erro ao abrir ./Arquivos_Gerados/arquivos_embaralhados.csv");
-        printf("\033[1;33mCertifique-se de que a pasta 'Arquivos_Gerados' está criada, se não é necessário executar o programa 'gerador.c'.\033[0m\n");
+        printf("\033[1;33mCertifique-se de que a pasta 'Arquivos_Gerados' esta criada, se nao e necessario executar o programa 'gerador.c'.\033[0m\n");
 
         return 1;
     }
@@ -89,7 +89,7 @@ int main() {
 
         FILE* saida = fopen(nome_arquivo, "w");
         if (!saida) {
-            perror("Erro ao criar arquivo de saída");
+            perror("Erro ao criar arquivo de saida");
             continue;
         }
 
@@ -100,6 +100,6 @@ int main() {
         free(s->leituras);
     }
 
-    printf("\033[1;32mOrganização concluída com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/.\n");
+    printf("\033[1;32mOrganizacao concluida com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/.\n");
     return 0;
 }

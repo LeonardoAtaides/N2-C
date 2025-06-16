@@ -34,7 +34,7 @@ time_t converter_para_timestamp(const char *data_str) {
         &t.tm_mday, &t.tm_mon, &t.tm_year,
         &t.tm_hour, &t.tm_min, &t.tm_sec);
     if (campos != 6) {
-        fprintf(stderr, "Formato de data/hora inválido. Use dd/mm/yyyy-hh:mm:ss\n");
+        fprintf(stderr, "Formato de data/hora invalido. Use dd/mm/yyyy-hh:mm:ss\n");
         return (time_t)-1;
     }
 
@@ -110,13 +110,13 @@ int main(int argc, char *argv[]) {
     time_t inicio = converter_para_timestamp(argv[1]);
     time_t fim = converter_para_timestamp(argv[2]);
     if (inicio == (time_t)-1 || fim == (time_t)-1 || fim < inicio) {
-        fprintf(stderr, "Intervalo de datas inválido.\n");
+        fprintf(stderr, "Intervalo de datas invalido.\n");
         return 1;
     }
 
     int qtd_sensores = argc - 3;
     if (qtd_sensores > MAX_SENSORES) {
-        fprintf(stderr, "Limite máximo de sensores (%d) ultrapassado.\n", MAX_SENSORES);
+        fprintf(stderr, "Limite maximo de sensores (%d) ultrapassado.\n", MAX_SENSORES);
         return 1;
     }
 
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 
         sensores[i].tipo = obter_tipo(tipo_str);
         if (sensores[i].tipo == TIPO_INVALIDO) {
-            fprintf(stderr, "Tipo inválido para sensor %s\n", nome_tipo_tmp);
+            fprintf(stderr, "Tipo invalido para sensor %s\n", nome_tipo_tmp);
             return 1;
         }
         strncpy(sensores[i].nome, nome_tipo_tmp, MAX_NOME);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     int total_leituras = qtd_sensores * MAX_LEITURAS;
     Leitura *leituras = malloc(sizeof(Leitura) * total_leituras);
     if (!leituras) {
-        fprintf(stderr, "Erro de memória.\n");
+        fprintf(stderr, "Erro de memoria.\n");
         fclose(arquivo);
         return 1;
     }

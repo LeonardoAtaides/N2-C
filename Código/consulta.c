@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     long timestamp_consulta = strtol(argv[2], &fim_parse, 10);
 
     if (*fim_parse != '\0') {
-        printf("\033[1;31mErro: Timestamp inválido. Use número inteiro representando unix epoch.\033[0m\n");
+        printf("\033[1;31mErro: Timestamp invalido. Use numero inteiro representando unix epoch.\033[0m\n");
         return 1;
     }
 
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/%s.csv", id_sensor);
 
     if (!arquivo_existe(caminho_arquivo)) {
-        printf("\033[1;31mErro: Sensor '%s' não encontrado. Verifique o nome do sensor.\033[0m\n", id_sensor);
+        printf("\033[1;31mErro: Sensor '%s' nao encontrado. Verifique o nome do sensor.\033[0m\n", id_sensor);
         return 1;
     }
 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 
     dados = malloc(capacidade * sizeof(Leitura));
     if (!dados) {
-        printf("\033[1;31mErro ao alocar memória.\033[0m\n");
+        printf("\033[1;31mErro ao alocar memoria.\033[0m\n");
         fclose(arquivo);
         return 1;
     }
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
             capacidade *= 2;
             Leitura* temp = realloc(dados, capacidade * sizeof(Leitura));
             if (!temp) {
-                printf("\033[1;31mErro ao realocar memória.\033[0m\n");
+                printf("\033[1;31mErro ao realocar memoria.\033[0m\n");
                 free(dados);
                 fclose(arquivo);
                 return 1;
@@ -129,12 +129,12 @@ int main(int argc, char* argv[]) {
 
     int indice = busca_binaria_proximo(dados, qtd, timestamp_consulta);
     if (indice == -1) {
-        printf("\033[1;33mNenhuma leitura encontrada próxima ao timestamp fornecido.\033[0m\n");
+        printf("\033[1;33mNenhuma leitura encontrada proxima ao timestamp fornecido.\033[0m\n");
         free(dados);
         return 1;
     }
 
-    printf("Leitura mais próxima encontrada:\n");
+    printf("Leitura mais proxima encontrada:\n");
     printf("Timestamp: %ld\n", dados[indice].timestamp);
     printf("Sensor: %s\n", id_sensor);
     printf("Valor: %s\n", dados[indice].valor);
