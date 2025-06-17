@@ -42,7 +42,7 @@ void adicionar_pela_leitura(Sensor* sensor, long timestamp, const char* valor) {
         sensor->capacidade *= 2;
         sensor->leituras = realloc(sensor->leituras, sensor->capacidade * sizeof(Leitura));
         if (!sensor->leituras) {
-            perror("Erro de alocação");
+            perror("Erro de alocacao");
             exit(EXIT_FAILURE);
         }
     }
