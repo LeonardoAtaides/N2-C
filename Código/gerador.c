@@ -77,10 +77,10 @@ char *gerar_valor_aleatorio(TipoDado tipo) {
 }
 
 TipoDado obter_tipo(const char *tipo_str) {
-    if (strcmp(tipo_str, "int") == 0) return TIPO_INT;
-    if (strcmp(tipo_str, "bool") == 0) return TIPO_BOOL;
-    if (strcmp(tipo_str, "float") == 0) return TIPO_FLOAT;
-    if (strcmp(tipo_str, "string") == 0) return TIPO_STRING;
+    if (strcmp(tipo_str, "CONJ_Z") == 0) return TIPO_INT;
+    if (strcmp(tipo_str, "BINARIO") == 0) return TIPO_BOOL;
+    if (strcmp(tipo_str, "CONJ_Q") == 0) return TIPO_FLOAT;
+    if (strcmp(tipo_str, "TEXTO") == 0) return TIPO_STRING;
     return TIPO_INVALIDO;
 }
 
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     if (argc < 4) {
         printf("\033[1;33mALERTA! PARA GERAR O ARQUIVO DEVE SER NESTE FORMATO:\033[0m\n");
         printf("Uso: .\\%s <data_inicio> <data_fim> <sensor1:tipo> [sensor2:tipo] ...\n", execName);
-        printf("\033[1;32mExemplo:\033[0m .\\%s 15/06/2025-00:00:00 15/06/2025-23:59:59 temp:int umidade:float\n\n", execName);
+        printf("\033[1;32mExemplo:\033[0m .\\%s 15/06/2025-00:00:00 15/06/2025-23:59:59 temp:CONJ_Z umidade:CONJ_Q alarme:BINARIO nome_sensor:TEXTO\n\n", execName);
         return 1;
     }
 
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 
         sensores[i].tipo = obter_tipo(tipo_str);
         if (sensores[i].tipo == TIPO_INVALIDO) {
-            fprintf(stderr, "Tipo invalido para sensor %s\n", nome_tipo_tmp);
+            fprintf(stderr, "Tipo invalido para sensor %s: %s\n", nome_tipo_tmp, tipo_str);
             return 1;
         }
         strncpy(sensores[i].nome, nome_tipo_tmp, MAX_NOME);
