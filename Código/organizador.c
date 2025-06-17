@@ -97,7 +97,6 @@ int main() {
 
     fclose(entrada);
 
-    // Criar pasta sensores_organizados dentro de Arquivos_Gerados
 #ifdef _WIN32
     _mkdir("./Arquivos_Gerados/sensores_organizados");
 #else
