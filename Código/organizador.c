@@ -58,7 +58,7 @@ int main() {
     FILE* entrada = fopen(caminho_csv, "r");
     if (!entrada) {
         perror("Erro ao abrir ./Arquivos_Gerados/arquivos_embaralhados.csv");
-        printf("\033[1;33mCertifique-se de que a pasta 'Arquivos_Gerados' está criada, se não é necessário executar o programa 'gerador.c'.\033[0m\n");
+        printf("\033[1;33mCertifique-se de que a pasta 'Arquivos_Gerados' esta criada, se nao e necessario executar o programa 'gerar_sensores.c'.\033[0m\n");
         return 1;
     }
 
@@ -76,14 +76,14 @@ int main() {
         int idx = encontrar_pelo_sensor(sensores, total_sensores, id_sensor);
         if (idx == -1) {
             if (total_sensores >= MAX_SENSORES) {
-                fprintf(stderr, "Limite máximo de sensores atingido.\n");
+                fprintf(stderr, "Limite maximo de sensores atingido.\n");
                 break;
             }
             strncpy(sensores[total_sensores].id_sensor, id_sensor, MAX_ID);
             sensores[total_sensores].id_sensor[MAX_ID - 1] = '\0';
             sensores[total_sensores].leituras = malloc(100 * sizeof(Leitura));
             if (!sensores[total_sensores].leituras) {
-                perror("Erro de alocação");
+                perror("Erro de alocacao");
                 fclose(entrada);
                 return 1;
             }
@@ -125,6 +125,6 @@ int main() {
         free(s->leituras);
     }
 
-    printf("\033[1;32mOrganização concluída com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/sensores_organizados/.\n");
+    printf("\033[1;32mOrganizacaoo concluida com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/sensores_organizados/.\n");
     return 0;
 }
