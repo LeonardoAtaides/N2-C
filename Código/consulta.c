@@ -3,6 +3,7 @@
 #include <string.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define MAX_LINHA 128
 #define MAX_VALOR 64
@@ -24,7 +25,6 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
 
     while (inicio <= fim) {
         int meio = (inicio + fim) / 2;
-
         long dif_atual = diferenca(dados[meio].timestamp, alvo);
         if (dif_atual < menor_dif) {
             menor_dif = dif_atual;
@@ -33,7 +33,7 @@ int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
 
         if (dados[meio].timestamp == alvo) {
             return meio;
-        } else if (dados[meio].timestamp < alvo) {
+        } else if (dados[meio].timestamp > alvo) {
             inicio = meio + 1;
         } else {
             fim = meio - 1;
@@ -50,17 +50,22 @@ int arquivo_existe(const char *caminho) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        printf("\033[1;33mALERTA! PARA REALIZAR A CONSULTA DEVE SER NESTE FORMATO:\033[0m\n");
-        printf("\033[1;32mExemplo:\033[0m.\\consulta <id_sensor> <timestamp>\n", argv[0]);
+        printf("\033[1;33mALERTA! USO CORRETO:\033[0m\n");
+        printf("\033[1;32mExemplo:\033[0m ./consulta temperatura \"2024-06-17 14:30:00\"\n");
         return 1;
     }
 
     char* id_sensor = argv[1];
-    char* fim_parse;
-    long timestamp_consulta = strtol(argv[2], &fim_parse, 10);
+    struct tm tm_data = {0};
 
-    if (*fim_parse != '\0') {
-        printf("\033[1;31mErro: Timestamp invalido. Use numero inteiro representando unix epoch.\033[0m\n");
+    if (strptime(argv[2], "%Y-%m-%d %H:%M:%S", &tm_data) == NULL) {
+        printf("\033[1;31mErro: Formato de data inválido. Use 'AAAA-MM-DD HH:MM:SS'.\033[0m\n");
+        return 1;
+    }
+
+    time_t timestamp_consulta = mktime(&tm_data);
+    if (timestamp_consulta == -1) {
+        printf("\033[1;31mErro ao converter data para timestamp.\033[0m\n");
         return 1;
     }
 
@@ -68,7 +73,7 @@ int main(int argc, char* argv[]) {
     snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/%s.csv", id_sensor);
 
     if (!arquivo_existe(caminho_arquivo)) {
-        printf("\033[1;31mErro: Sensor '%s' nao encontrado. Verifique o nome do sensor.\033[0m\n", id_sensor);
+        printf("\033[1;31mErro: Sensor '%s' não encontrado.\033[0m\n", id_sensor);
         return 1;
     }
 
@@ -78,34 +83,21 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Leitura* dados = NULL;
-    int capacidade = 1000;
-    int qtd = 0;
-
-    dados = malloc(capacidade * sizeof(Leitura));
-    if (!dados) {
-        printf("\033[1;31mErro ao alocar memoria.\033[0m\n");
-        fclose(arquivo);
-        return 1;
-    }
+    Leitura* dados = malloc(1000 * sizeof(Leitura));
+    int capacidade = 1000, qtd = 0;
 
     char linha[MAX_LINHA];
     while (fgets(linha, sizeof(linha), arquivo)) {
         long ts;
         char id_lido[MAX_ID], valor[MAX_VALOR];
-        int campos_lidos = sscanf(linha, "%ld %s %s", &ts, id_lido, valor);
-        if (campos_lidos != 3) {
-            continue;
-        }
-        if (strcmp(id_lido, id_sensor) != 0) {
-            continue;
-        }
+        if (sscanf(linha, "%ld %s %s", &ts, id_lido, valor) != 3) continue;
+        if (strcmp(id_lido, id_sensor) != 0) continue;
 
         if (qtd >= capacidade) {
             capacidade *= 2;
             Leitura* temp = realloc(dados, capacidade * sizeof(Leitura));
             if (!temp) {
-                printf("\033[1;31mErro ao realocar memoria.\033[0m\n");
+                printf("\033[1;31mErro ao realocar memória.\033[0m\n");
                 free(dados);
                 fclose(arquivo);
                 return 1;
@@ -115,7 +107,7 @@ int main(int argc, char* argv[]) {
 
         dados[qtd].timestamp = ts;
         strncpy(dados[qtd].valor, valor, MAX_VALOR - 1);
-        dados[qtd].valor[MAX_VALOR - 1] = '\0'; 
+        dados[qtd].valor[MAX_VALOR - 1] = '\0';
         qtd++;
     }
 
@@ -129,13 +121,18 @@ int main(int argc, char* argv[]) {
 
     int indice = busca_binaria_proximo(dados, qtd, timestamp_consulta);
     if (indice == -1) {
-        printf("\033[1;33mNenhuma leitura encontrada proxima ao timestamp fornecido.\033[0m\n");
+        printf("\033[1;33mNenhuma leitura próxima à data informada.\033[0m\n");
         free(dados);
         return 1;
     }
 
-    printf("Leitura mais proxima encontrada:\n");
-    printf("Timestamp: %ld\n", dados[indice].timestamp);
+    char buffer_data[64];
+    time_t encontrado = dados[indice].timestamp;
+    struct tm *info_data = localtime(&encontrado);
+    strftime(buffer_data, sizeof(buffer_data), "%Y-%m-%d %H:%M:%S", info_data);
+
+    printf("\033[1;34mLeitura mais próxima encontrada:\033[0m\n");
+    printf("Data e Hora: %s\n", buffer_data);
     printf("Sensor: %s\n", id_sensor);
     printf("Valor: %s\n", dados[indice].valor);
 
