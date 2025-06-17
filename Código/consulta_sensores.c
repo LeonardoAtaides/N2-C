@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
     snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/sensores_organizados/%s.csv", id_sensor);
 
     if (!arquivo_existe(caminho_arquivo)) {
-        printf("\033[1;31mErro: Sensor '%s' não encontrado.\033[0m\n", id_sensor);
+        printf("\033[1;31mErro: Sensor '%s' nao encontrado.\033[0m\n", id_sensor);
         return 1;
     }
 
