@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
 #include <direct.h> 
+#else
 #include <sys/stat.h>
+#endif
 
 #define MAX_SENSORES 100
 #define MAX_ID 32
@@ -24,7 +27,7 @@ typedef struct {
 int comparar_por_timestamp(const void* a, const void* b) {
     Leitura* la = (Leitura*)a;
     Leitura* lb = (Leitura*)b;
-    return (lb->timestamp > la->timestamp) - (lb->timestamp < la->timestamp);
+    return (la->timestamp > lb->timestamp) - (la->timestamp < lb->timestamp);
 }
 
 int encontrar_sensor(Sensor sensores[], int total, const char* id) {
@@ -38,9 +41,14 @@ void adicionar_leitura(Sensor* sensor, long timestamp, const char* valor) {
     if (sensor->qtd >= sensor->capacidade) {
         sensor->capacidade *= 2;
         sensor->leituras = realloc(sensor->leituras, sensor->capacidade * sizeof(Leitura));
+        if (!sensor->leituras) {
+            perror("Erro de alocação");
+            exit(EXIT_FAILURE);
+        }
     }
     sensor->leituras[sensor->qtd].timestamp = timestamp;
     strncpy(sensor->leituras[sensor->qtd].valor, valor, MAX_VALOR);
+    sensor->leituras[sensor->qtd].valor[MAX_VALOR - 1] = '\0';
     sensor->qtd++;
 }
 
@@ -67,8 +75,18 @@ int main() {
 
         int idx = encontrar_sensor(sensores, total_sensores, id_sensor);
         if (idx == -1) {
+            if (total_sensores >= MAX_SENSORES) {
+                fprintf(stderr, "Limite maximo de sensores atingido.\n");
+                break;
+            }
             strncpy(sensores[total_sensores].id_sensor, id_sensor, MAX_ID);
+            sensores[total_sensores].id_sensor[MAX_ID - 1] = '\0';
             sensores[total_sensores].leituras = malloc(100 * sizeof(Leitura));
+            if (!sensores[total_sensores].leituras) {
+                perror("Erro de alocação");
+                fclose(entrada);
+                return 1;
+            }
             sensores[total_sensores].qtd = 0;
             sensores[total_sensores].capacidade = 100;
             idx = total_sensores++;
