@@ -24,7 +24,7 @@ typedef struct {
 int comparar_por_timestamp(const void* a, const void* b) {
     Leitura* la = (Leitura*)a;
     Leitura* lb = (Leitura*)b;
-    return (la->timestamp > lb->timestamp) - (la->timestamp < lb->timestamp);
+    return (lb->timestamp > la->timestamp) - (lb->timestamp < la->timestamp);
 }
 
 int encontrar_sensor(Sensor sensores[], int total, const char* id) {
@@ -50,8 +50,7 @@ int main() {
     FILE* entrada = fopen(caminho_csv, "r");
     if (!entrada) {
         perror("Erro ao abrir ./Arquivos_Gerados/arquivos_embaralhados.csv");
-        printf("\033[1;33mCertifique-se de que a pasta 'Arquivos_Gerados' esta criada, se nao e necessario executar o programa 'gerador.c'.\033[0m\n");
-
+        printf("\033[1;33mCertifique-se de que a pasta 'Arquivos_Gerados' está criada, se não é necessário executar o programa 'gerador.c'.\033[0m\n");
         return 1;
     }
 
@@ -89,17 +88,18 @@ int main() {
 
         FILE* saida = fopen(nome_arquivo, "w");
         if (!saida) {
-            perror("Erro ao criar arquivo de saida");
+            perror("Erro ao criar arquivo de saída");
             continue;
         }
 
         for (int j = 0; j < s->qtd; j++) {
             fprintf(saida, "%ld %s %s\n", s->leituras[j].timestamp, s->id_sensor, s->leituras[j].valor);
         }
+
         fclose(saida);
         free(s->leituras);
     }
 
-    printf("\033[1;32mOrganizacao concluida com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/.\n");
+    printf("\033[1;32mOrganização concluída com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/.\n");
     return 0;
 }
