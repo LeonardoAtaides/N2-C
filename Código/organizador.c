@@ -76,7 +76,7 @@ int main() {
         int idx = encontrar_pelo_sensor(sensores, total_sensores, id_sensor);
         if (idx == -1) {
             if (total_sensores >= MAX_SENSORES) {
-                fprintf(stderr, "Limite maximo de sensores atingido.\n");
+                fprintf(stderr, "Limite máximo de sensores atingido.\n");
                 break;
             }
             strncpy(sensores[total_sensores].id_sensor, id_sensor, MAX_ID);
@@ -97,12 +97,19 @@ int main() {
 
     fclose(entrada);
 
+    // Criar pasta sensores_organizados dentro de Arquivos_Gerados
+#ifdef _WIN32
+    _mkdir("./Arquivos_Gerados/sensores_organizados");
+#else
+    mkdir("./Arquivos_Gerados/sensores_organizados", 0777);
+#endif
+
     for (int i = 0; i < total_sensores; i++) {
         Sensor* s = &sensores[i];
         qsort(s->leituras, s->qtd, sizeof(Leitura), comparando_por_timestamp);
 
-        char nome_arquivo[128];
-        snprintf(nome_arquivo, sizeof(nome_arquivo), "./Arquivos_Gerados/%s.csv", s->id_sensor);
+        char nome_arquivo[256];
+        snprintf(nome_arquivo, sizeof(nome_arquivo), "./Arquivos_Gerados/sensores_organizados/%s.csv", s->id_sensor);
 
         FILE* saida = fopen(nome_arquivo, "w");
         if (!saida) {
@@ -118,6 +125,6 @@ int main() {
         free(s->leituras);
     }
 
-    printf("\033[1;32mOrganização concluída com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/.\n");
+    printf("\033[1;32mOrganização concluída com sucesso!\033[0m Arquivos salvos em Arquivos_Gerados/sensores_organizados/.\n");
     return 0;
 }

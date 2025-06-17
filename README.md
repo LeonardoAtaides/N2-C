@@ -4,9 +4,9 @@
 **Antes de iniciar a execução, certifique-se se esta na pasta `Código`, em seguida compile os programas com os seguintes comandos:**
 
 ```bash
-gcc gerador.c -o gerador
+gcc gerar_sensores.c -o gerar_sensores
 gcc organizador.c -o organizador
-gcc consulta.c -o consulta
+gcc consulta_sensores.c -o consulta_sensores
 ```
 
 ---
@@ -16,12 +16,13 @@ gcc consulta.c -o consulta
 ###  Etapa 1 – Gerador de Arquivos (Programa 3)
 _A lógica do programa 3, está neste arquivo:_
 ```bash
-gerador.c
+gerar_sensores.c
 ```
 Execute o gerador com:
 
 ```bash
-./gerador
+./gerar_sensores.exe *ou*
+./gerar_sensores
 ```
 
 Ele fornecerá instruções de uso, como demonstrado na imagem abaixo:
