@@ -24,20 +24,20 @@ typedef struct {
     int capacidade;
 } Sensor;
 
-int comparar_por_timestamp(const void* a, const void* b) {
+int comparando_por_timestamp(const void* a, const void* b) {
     Leitura* la = (Leitura*)a;
     Leitura* lb = (Leitura*)b;
     return (la->timestamp > lb->timestamp) - (la->timestamp < lb->timestamp);
 }
 
-int encontrar_sensor(Sensor sensores[], int total, const char* id) {
+int encontrar_pelo_sensor(Sensor sensores[], int total, const char* id) {
     for (int i = 0; i < total; i++) {
         if (strcmp(sensores[i].id_sensor, id) == 0) return i;
     }
     return -1;
 }
 
-void adicionar_leitura(Sensor* sensor, long timestamp, const char* valor) {
+void adicionar_pela_leitura(Sensor* sensor, long timestamp, const char* valor) {
     if (sensor->qtd >= sensor->capacidade) {
         sensor->capacidade *= 2;
         sensor->leituras = realloc(sensor->leituras, sensor->capacidade * sizeof(Leitura));
@@ -73,7 +73,7 @@ int main() {
 
         if (sscanf(linha, "%ld %s %s", &timestamp, id_sensor, valor) != 3) continue;
 
-        int idx = encontrar_sensor(sensores, total_sensores, id_sensor);
+        int idx = encontrar_pelo_sensor(sensores, total_sensores, id_sensor);
         if (idx == -1) {
             if (total_sensores >= MAX_SENSORES) {
                 fprintf(stderr, "Limite maximo de sensores atingido.\n");
@@ -92,14 +92,14 @@ int main() {
             idx = total_sensores++;
         }
 
-        adicionar_leitura(&sensores[idx], timestamp, valor);
+        adicionar_pela_leitura(&sensores[idx], timestamp, valor);
     }
 
     fclose(entrada);
 
     for (int i = 0; i < total_sensores; i++) {
         Sensor* s = &sensores[i];
-        qsort(s->leituras, s->qtd, sizeof(Leitura), comparar_por_timestamp);
+        qsort(s->leituras, s->qtd, sizeof(Leitura), comparando_por_timestamp);
 
         char nome_arquivo[128];
         snprintf(nome_arquivo, sizeof(nome_arquivo), "./Arquivos_Gerados/%s.csv", s->id_sensor);

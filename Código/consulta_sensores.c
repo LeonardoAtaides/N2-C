@@ -18,7 +18,7 @@ long diferenca(long a, long b) {
     return labs(a - b);
 }
 
-int busca_binaria_proximo(Leitura* dados, int n, long alvo) {
+int busca_binaria_pelo_proximo(Leitura* dados, int n, long alvo) {
     int inicio = 0, fim = n - 1;
     int mais_proximo = -1;
     long menor_dif = LONG_MAX;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int indice = busca_binaria_proximo(dados, qtd, timestamp_consulta);
+    int indice = busca_binaria_pelo_proximo(dados, qtd, timestamp_consulta);
     if (indice == -1) {
         printf("\033[1;33mNenhuma leitura próxima à data informada.\033[0m\n");
         free(dados);
