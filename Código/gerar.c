@@ -14,7 +14,7 @@
 #define MAX_NOME 32
 #define MAX_LEITURAS 2000
 
-typedef enum { TIPO_INT, TIPO_BOOL, TIPO_FLOAT, TIPO_STRING, TIPO_INVALIDO = -1 } TipoDado;
+typedef enum { INT, BOOL, FLOAT, STRING, INVALIDO = -1 } TipoDado;
 
 typedef struct {
     char nome[MAX_NOME];
@@ -78,16 +78,16 @@ time_t converter_para_timestamp(const char *data_str) {
 char *gerar_valor_aleatorio(TipoDado tipo) {
     static char buffer[32];
     switch (tipo) {
-        case TIPO_INT:
+        case INT:
             sprintf(buffer, "%d", rand() % 1000);
             break;
-        case TIPO_BOOL:
+        case BOOL:
             sprintf(buffer, "%s", (rand() % 2) ? "true" : "false");
             break;
-        case TIPO_FLOAT:
+        case FLOAT:
             sprintf(buffer, "%.2f", ((float)rand() / RAND_MAX) * 100.0f);
             break;
-        case TIPO_STRING: {
+        case STRING: {
             int len = 4 + rand() % 13;
             for (int i = 0; i < len; i++) {
                 buffer[i] = 'A' + rand() % 26;
@@ -103,11 +103,11 @@ char *gerar_valor_aleatorio(TipoDado tipo) {
 }
 
 TipoDado obter_tipo(const char *tipo_str) {
-    if (strcmp(tipo_str, "CONJ_Z") == 0) return TIPO_INT;
-    if (strcmp(tipo_str, "BINARIO") == 0) return TIPO_BOOL;
-    if (strcmp(tipo_str, "CONJ_Q") == 0) return TIPO_FLOAT;
-    if (strcmp(tipo_str, "TEXTO") == 0) return TIPO_STRING;
-    return TIPO_INVALIDO;
+    if (strcmp(tipo_str, "CONJ_Z") == 0) return INT;
+    if (strcmp(tipo_str, "BINARIO") == 0) return BOOL;
+    if (strcmp(tipo_str, "CONJ_Q") == 0) return FLOAT;
+    if (strcmp(tipo_str, "TEXTO") == 0) return STRING;
+    return INVALIDO;
 }
 
 void embaralhar_leituras(Leitura *leituras, int n) {
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
         }
 
         sensores[i].tipo = obter_tipo(tipo_str);
-        if (sensores[i].tipo == TIPO_INVALIDO) {
+        if (sensores[i].tipo == INVALIDO) {
             fprintf(stderr, "\033[1;31mTipo invalido para sensor '%s': '%s'. Tipos validos: CONJ_Z, BINARIO, CONJ_Q, TEXTO\033[0m\n", nome_tipo_tmp, tipo_str);
             return 1;
         }
