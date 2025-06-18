@@ -63,7 +63,7 @@ consulta.c
 ```
 Execute o consultar com:
 ```bash
-./consulta <id_sensor> <timestamp>
+./consulta <id_sensor> <data-hora>
 ```
 
 Se executado sem parâmetros, ele exibe uma orientação de uso semelhante à imagem abaixo:
