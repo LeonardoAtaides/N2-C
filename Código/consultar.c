@@ -70,7 +70,7 @@ int validar_data(int dia, int mes, int ano, int hora, int min, int seg) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        printf("\033[1;33mUSO CORRETO:\033[0m\n");
+        printf("\033[1;33mALERTA! PARA CONSULTAR DEVE SER NESTE FORMATO:\033[0m\n");
         printf("\033[1;32mExemplo:\033[0m ./consultar nome_sensor 15/06/2025-14:30:00\n");
         return 1;
     }
