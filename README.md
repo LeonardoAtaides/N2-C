@@ -50,7 +50,7 @@ Execute o organizador com:
 ./organizador
 ```
 
-Este programa irá ler os dados embaralhados e gerar automaticamente arquivos organizados para cada sensor dentro da pasta `Arquivos_Gerados/` dentro dela os sensores organizados ficaram dentro de um subpasta com nome `sensores_organizados`..
+Este programa irá ler os dados embaralhados e gerar automaticamente arquivos organizados para cada sensor dentro da pasta `Arquivos_Gerados/` dentro dela os sensores organizados serão salvos na subpasta `sensores_organizados`..
 
 ---
 
