@@ -2,6 +2,6 @@ build
 output
 /.vscode
 Arquivos_Gerados
-gerar_sensores.exe
-consulta_sensores.exe
+gerar.exe
+consultar.exe
 organizador.exe

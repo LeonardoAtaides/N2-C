@@ -16,13 +16,13 @@ gcc consulta_sensores.c -o consulta_sensores
 ###  Etapa 1 – Gerador de Arquivos (Programa 3)
 _A lógica do programa 3, está neste arquivo:_
 ```bash
-gerar_sensores.c
+gerar.c
 ```
 Execute o gerador com:
 
 ```bash
-./gerar_sensores.exe *ou*
-./gerar_sensores
+./gerar.exe *ou*
+./gerar
 ```
 
 Ele fornecerá instruções de uso, como demonstrado na imagem abaixo:
