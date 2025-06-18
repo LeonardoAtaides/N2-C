@@ -51,7 +51,7 @@ int arquivo_existe(const char *caminho) {
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("\033[1;33mUSO CORRETO:\033[0m\n");
-        printf("\033[1;32mExemplo:\033[0m ./consulta_sensores temperatura 15/06/2025-14:30:00\n");
+        printf("\033[1;32mExemplo:\033[0m ./consultar nome_sensor 15/06/2025-14:30:00\n");
         return 1;
     }
 
