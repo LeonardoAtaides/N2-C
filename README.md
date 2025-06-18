@@ -28,7 +28,7 @@ Execute o gerador com:
 Ele fornecerá instruções de uso, como demonstrado na imagem abaixo:
 
  **Exemplo de uso do Gerador**:  
-[![Print Gerador](https://drive.google.com/uc?id=1YVaNP9SGPJztgaCKvXODr7e0MczsBJsE)](https://drive.google.com/file/d/1YVaNP9SGPJztgaCKvXODr7e0MczsBJsE/view?usp=drive_link)
+[![Print Gerador](https://drive.google.com/uc?id=1koSHgnGWup4cY_0piE6_mH1sFw8Fga8m)](https://drive.google.com/file/d/1koSHgnGWup4cY_0piE6_mH1sFw8Fga8m/view?usp=drive_link)
 
 Ao usar o comando corretamente, o programa criará uma pasta chamada `Arquivos_Gerados/`, contendo o arquivo:
 
@@ -63,13 +63,13 @@ consulta.c
 ```
 Execute o consultar com:
 ```bash
-./consulta <id_sensor> <data-hora>
+./consulta.exe <nome_sensor> <data-hora> *ou*
+./consulta <nome_sensor> <data-hora> *ou*
 ```
-
 Se executado sem parâmetros, ele exibe uma orientação de uso semelhante à imagem abaixo:
 
 **Exemplo de uso da Consulta**:  
-[![Print Consulta](https://drive.google.com/uc?id=10FJIAeuHvAMZSBekeallZXOMTmlGQ03F)](https://drive.google.com/file/d/10FJIAeuHvAMZSBekeallZXOMTmlGQ03F/view?usp=drive_link)
+[![Print Consulta](https://drive.google.com/uc?id=gtDYoHcWzcpWjjvxiYxpHvdUA0cc)](https://drive.google.com/file/d/10X7-gtDYoHcWzcpWjjvxiYxpHvdUA0cc/view?usp=drive_link)
 
 
 Desenvolvido por: **Leonardo Ataídes**  
