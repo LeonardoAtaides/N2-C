@@ -4,9 +4,9 @@
 **Antes de iniciar a execução, certifique-se se esta na pasta `Código`, em seguida compile os programas com os seguintes comandos:**
 
 ```bash
-gcc gerar_sensores.c -o gerar_sensores
+gcc gerar.c -o gerar
 gcc organizador.c -o organizador
-gcc consulta_sensores.c -o consulta_sensores
+gcc consultar.c -o consulta
 ```
 
 ---
@@ -46,10 +46,11 @@ organizador.c
 Execute o organizador com:
 
 ```bash
+./organizador.exe *ou*
 ./organizador
 ```
 
-Este programa irá ler os dados embaralhados e gerar automaticamente arquivos organizados para cada sensor dentro da pasta `Arquivos_Gerados/`.
+Este programa irá ler os dados embaralhados e gerar automaticamente arquivos organizados para cada sensor dentro da pasta `Arquivos_Gerados/` dentro dela os sensores organizados ficaram dentro de um subpasta com nome `sensores_organizados`..
 
 ---
 
