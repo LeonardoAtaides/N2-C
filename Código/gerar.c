@@ -30,22 +30,48 @@ typedef struct {
 time_t converter_para_timestamp(const char *data_str) {
     struct tm t;
     memset(&t, 0, sizeof(t));
-    int campos = sscanf(data_str, "%d/%d/%d-%d:%d:%d",
-        &t.tm_mday, &t.tm_mon, &t.tm_year,
-        &t.tm_hour, &t.tm_min, &t.tm_sec);
+
+    int dia, mes, ano, hora, min, seg;
+
+    int campos = sscanf(data_str, "%d/%d/%d-%d:%d:%d", &dia, &mes, &ano, &hora, &min, &seg);
     if (campos != 6) {
-        fprintf(stderr, "Formato de data/hora invalido. Use dd/mm/yyyy-hh:mm:ss\n");
+        fprintf(stderr, "\033[1;31mFormato de data/hora invalido. Use: dd/mm/yyyy-hh:mm:ss\033[0m\n");
         return (time_t)-1;
     }
 
-    t.tm_year -= 1900;
-    t.tm_mon -= 1;
+    if (dia < 1 || dia > 30) {
+        fprintf(stderr, "\033[1;31mDia invalido: %d. Use entre 01 e 30.\033[0m\n", dia);
+        return (time_t)-1;
+    }
+
+    if (mes < 1 || mes > 12) {
+        fprintf(stderr, "\033[1;31mMes invalido: %d. Use entre 01 e 12.\033[0m\n", mes);
+        return (time_t)-1;
+    }
+
+    if (ano < 1900) {
+        fprintf(stderr, "\033[1;31mAno invalido: %d. Use ano maior ou igual a 1900.\033[0m\n", ano);
+        return (time_t)-1;
+    }
+
+    if (hora < 0 || hora > 23 || min < 0 || min > 59 || seg < 0 || seg > 59) {
+        fprintf(stderr, "\033[1;31mHora invalida: %02d:%02d:%02d. Use valores entre 00:00:00 e 23:59:59.\033[0m\n", hora, min, seg);
+        return (time_t)-1;
+    }
+
+    t.tm_mday = dia;
+    t.tm_mon = mes - 1;
+    t.tm_year = ano - 1900;
+    t.tm_hour = hora;
+    t.tm_min = min;
+    t.tm_sec = seg;
     t.tm_isdst = -1;
 
     time_t timestamp = mktime(&t);
     if (timestamp == (time_t)-1) {
-        fprintf(stderr, "Erro ao converter data/hora.\n");
+        fprintf(stderr, "\033[1;31mErro ao converter data/hora para timestamp.\033[0m\n");
     }
+
     return timestamp;
 }
 
@@ -110,13 +136,13 @@ int main(int argc, char *argv[]) {
     time_t inicio = converter_para_timestamp(argv[1]);
     time_t fim = converter_para_timestamp(argv[2]);
     if (inicio == (time_t)-1 || fim == (time_t)-1 || fim < inicio) {
-        fprintf(stderr, "Intervalo de datas invalido.\n");
+        fprintf(stderr, "\033[1;31mIntervalo de datas invalido.\033[0m\n");
         return 1;
     }
 
     int qtd_sensores = argc - 3;
     if (qtd_sensores > MAX_SENSORES) {
-        fprintf(stderr, "Limite maximo de sensores (%d) ultrapassado.\n", MAX_SENSORES);
+        fprintf(stderr, "\033[1;31mLimite maximo de sensores (%d) ultrapassado.\033[0m\n", MAX_SENSORES);
         return 1;
     }
 
@@ -128,18 +154,24 @@ int main(int argc, char *argv[]) {
 
         char *tipo_str = strchr(nome_tipo_tmp, ':');
         if (!tipo_str) {
-            fprintf(stderr, "Erro no argumento: %s\n", argv[i + 3]);
+            fprintf(stderr, "\033[1;31mErro no argumento: '%s'. Esperado formato sensor:TIPO.\033[0m\n", argv[i + 3]);
             return 1;
         }
 
         *tipo_str = '\0';
         tipo_str++;
 
-        sensores[i].tipo = obter_tipo(tipo_str);
-        if (sensores[i].tipo == TIPO_INVALIDO) {
-            fprintf(stderr, "Tipo invalido para sensor %s: %s\n", nome_tipo_tmp, tipo_str);
+        if (strlen(nome_tipo_tmp) == 0 || strlen(tipo_str) == 0) {
+            fprintf(stderr, "\033[1;31mFormato invalido em '%s'. Esperado sensor:TIPO, ex: temperatura:CONJ_Z\033[0m\n", argv[i + 3]);
             return 1;
         }
+
+        sensores[i].tipo = obter_tipo(tipo_str);
+        if (sensores[i].tipo == TIPO_INVALIDO) {
+            fprintf(stderr, "\033[1;31mTipo invalido para sensor '%s': '%s'. Tipos validos: CONJ_Z, BINARIO, CONJ_Q, TEXTO\033[0m\n", nome_tipo_tmp, tipo_str);
+            return 1;
+        }
+
         strncpy(sensores[i].nome, nome_tipo_tmp, MAX_NOME);
         sensores[i].nome[MAX_NOME - 1] = '\0';
     }
@@ -163,7 +195,7 @@ int main(int argc, char *argv[]) {
     int total_leituras = qtd_sensores * MAX_LEITURAS;
     Leitura *leituras = malloc(sizeof(Leitura) * total_leituras);
     if (!leituras) {
-        fprintf(stderr, "Erro de memoria.\n");
+        fprintf(stderr, "\033[1;31mErro de memoria.\033[0m\n");
         fclose(arquivo);
         return 1;
     }
