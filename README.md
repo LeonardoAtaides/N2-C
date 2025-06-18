@@ -6,7 +6,7 @@
 ```bash
 gcc gerar.c -o gerar
 gcc organizador.c -o organizador
-gcc consultar.c -o consulta
+gcc consultar.c -o consultar
 ```
 
 ---
@@ -59,7 +59,7 @@ Este programa irá ler os dados embaralhados e gerar automaticamente arquivos or
 Execute o programa de consulta com:
 _A lógica do programa 2, está neste arquivo:_
 ```bash
-consulta.c
+consultar.c
 ```
 Execute o consultar com:
 ```bash
