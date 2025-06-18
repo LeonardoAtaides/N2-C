@@ -48,6 +48,26 @@ int arquivo_existe(const char *caminho) {
     return (stat(caminho, &buffer) == 0);
 }
 
+int validar_data(int dia, int mes, int ano, int hora, int min, int seg) {
+    if (dia < 1 || dia > 31) {
+        printf("\033[1;31mErro: Dia inválido. Use um valor entre 01 e 31.\033[0m\n");
+        return 0;
+    }
+    if (mes < 1 || mes > 12) {
+        printf("\033[1;31mErro: Mês inválido. Use um valor entre 01 e 12.\033[0m\n");
+        return 0;
+    }
+    if (ano < 1900) {
+        printf("\033[1;31mErro: Ano inválido. Use um ano >= 1900.\033[0m\n");
+        return 0;
+    }
+    if (hora < 0 || hora > 23 || min < 0 || min > 59 || seg < 0 || seg > 59) {
+        printf("\033[1;31mErro: Hora inválida. Use valores entre 00:00:00 e 23:59:59.\033[0m\n");
+        return 0;
+    }
+    return 1;
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("\033[1;33mUSO CORRETO:\033[0m\n");
@@ -57,8 +77,13 @@ int main(int argc, char* argv[]) {
 
     char* id_sensor = argv[1];
     int dia, mes, ano, hora, min, seg;
+
     if (sscanf(argv[2], "%2d/%2d/%4d-%2d:%2d:%2d", &dia, &mes, &ano, &hora, &min, &seg) != 6) {
-        printf("\033[1;31mErro: Formato de data invalido. Use 'DD/MM/AAAA-HH:MM:SS'.\033[0m\n");
+        printf("\033[1;31mErro: Formato de data inválido. Use 'DD/MM/AAAA-HH:MM:SS'.\033[0m\n");
+        return 1;
+    }
+
+    if (!validar_data(dia, mes, ano, hora, min, seg)) {
         return 1;
     }
 
@@ -80,7 +105,7 @@ int main(int argc, char* argv[]) {
     snprintf(caminho_arquivo, sizeof(caminho_arquivo), "./Arquivos_Gerados/sensores_organizados/%s.csv", id_sensor);
 
     if (!arquivo_existe(caminho_arquivo)) {
-        printf("\033[1;31mErro: Sensor '%s' nao encontrado.\033[0m\n", id_sensor);
+        printf("\033[1;31mErro: Sensor '%s' não encontrado.\033[0m\n", id_sensor);
         return 1;
     }
 
@@ -104,7 +129,7 @@ int main(int argc, char* argv[]) {
             capacidade *= 2;
             Leitura* temp = realloc(dados, capacidade * sizeof(Leitura));
             if (!temp) {
-                printf("\033[1;31mErro ao realocar memoria.\033[0m\n");
+                printf("\033[1;31mErro ao realocar memória.\033[0m\n");
                 free(dados);
                 fclose(arquivo);
                 return 1;
@@ -128,7 +153,7 @@ int main(int argc, char* argv[]) {
 
     int indice = busca_binaria_pelo_proximo(dados, qtd, timestamp_consulta);
     if (indice == -1) {
-        printf("\033[1;33mNenhuma leitura proxima a data informada.\033[0m\n");
+        printf("\033[1;33mNenhuma leitura próxima à data informada.\033[0m\n");
         free(dados);
         return 1;
     }
@@ -138,7 +163,7 @@ int main(int argc, char* argv[]) {
     struct tm *info_data = localtime(&encontrado);
     strftime(buffer_data, sizeof(buffer_data), "%d/%m/%Y-%H:%M:%S", info_data);
 
-    printf("\033[1;34mLeitura mais proxima encontrada:\033[0m\n");
+    printf("\033[1;34mLeitura mais próxima encontrada:\033[0m\n");
     printf("Data e Hora: %s\n", buffer_data);
     printf("Sensor: %s\n", id_sensor);
     printf("Valor: %s\n", dados[indice].valor);
